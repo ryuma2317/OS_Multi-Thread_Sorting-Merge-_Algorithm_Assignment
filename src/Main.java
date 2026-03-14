@@ -7,10 +7,10 @@ public class Main {
         System.out.print("Before: ");
         printArray(array);
 
-        int mid = array.length / 2;
+        int mid = array.length / 2 - 1;
 
         // BUG — both threads get the same indices!
-        SortingThread st0 = new SortingThread(array, 0, mid - 1);
+        SortingThread st0 = new SortingThread(array, 0, mid);
         SortingThread st1 = new SortingThread(array, mid, array.length - 1);
 
         Thread thread0 = new Thread(st0);
@@ -26,8 +26,19 @@ public class Main {
             Thread.currentThread().interrupt();
         }
 
+        int[] result = new int[array.length];
+        MergingThread mt = new MergingThread(array, result, mid);
+        Thread mergeThread = new Thread(mt);
+        mergeThread.start();
+
+        try{
+            mergeThread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         System.out.print("\n After: ");
-        printArray(array);
+        printArray(result);
 
     }
 
