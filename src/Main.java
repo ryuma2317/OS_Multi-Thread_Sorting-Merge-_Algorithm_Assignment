@@ -11,7 +11,10 @@ public class Main {
 
         // BUG — both threads get the same indices!
         SortingThread st0 = new SortingThread(array, 0, mid);
-        SortingThread st1 = new SortingThread(array, mid, array.length - 1);
+        SortingThread st1 = new SortingThread(array, mid+1, array.length - 1);
+
+        //start time for multithread
+        long multiStart = System.currentTimeMillis();
 
         Thread thread0 = new Thread(st0);
         Thread thread1 = new Thread(st1);
@@ -39,9 +42,13 @@ public class Main {
             throw new RuntimeException("Merging was interrupted", e);
         }
 
+        long multiEnd = System.currentTimeMillis();
+
         System.out.print("\n After: ");
         printArray(result);
 
+        System.out.println("\n\nExecution time: ");
+        System.out.println("Multithreaded: " + (multiEnd - multiStart) + "ms");
     }
 
     static void printArray(int[] arr){
