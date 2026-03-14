@@ -24,6 +24,7 @@ public class Main {
             thread1.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Sorting was interrupted", e);
         }
 
         int[] result = new int[array.length];
@@ -35,6 +36,7 @@ public class Main {
             mergeThread.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Merging was interrupted", e);
         }
 
         System.out.print("\n After: ");
