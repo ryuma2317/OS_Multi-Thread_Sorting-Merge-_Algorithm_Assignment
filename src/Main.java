@@ -9,8 +9,26 @@ public class Main {
 
         int mid = array.length / 2 - 1;
 
+        // WARMUP RUN — result thrown away
+        runMultiThreadedSort(array.clone(), mid);
+        System.out.println("\nWarmup done — JVM is ready");
+
+        // REAL TIMED RUN
+        long multiStart = System.currentTimeMillis();
+        int[] result = runMultiThreadedSort(array.clone(), mid);
+        long multiEnd = System.currentTimeMillis();
+
+        System.out.print("\n After: ");
+        printArray(result);
+
+        System.out.println("\n\nExecution Time:");
+        System.out.println("Multithreaded: " + (multiEnd - multiStart) + " ms");
+    }
+
+    // ADDED INTO NEW METHOD
+    static int[] runMultiThreadedSort(int[] array, int mid) {
         SortingThread st0 = new SortingThread(array, 0, mid);
-        SortingThread st1 = new SortingThread(array, mid+1, array.length - 1);
+        SortingThread st1 = new SortingThread(array, mid + 1, array.length - 1);
 
         Thread thread0 = new Thread(st0);
         Thread thread1 = new Thread(st1);
@@ -18,9 +36,6 @@ public class Main {
         int[] result = new int[array.length];
         MergingThread mt = new MergingThread(array, result, mid);
         Thread mergeThread = new Thread(mt);
-
-        //start time for multithread
-        long multiStart = System.currentTimeMillis();
 
         thread0.start();
         thread1.start();
@@ -33,23 +48,15 @@ public class Main {
             throw new RuntimeException("Sorting was interrupted", e);
         }
 
-
         mergeThread.start();
-
-        try{
+        try {
             mergeThread.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Merging was interrupted", e);
         }
 
-        long multiEnd = System.currentTimeMillis();
-
-        System.out.print("\n After: ");
-        printArray(result);
-
-        System.out.println("\n\nExecution time: ");
-        System.out.println("Multithreaded: " + (multiEnd - multiStart) + "ms");
+        return result;
     }
 
     static void printArray(int[] arr){
