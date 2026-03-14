@@ -9,15 +9,18 @@ public class Main {
 
         int mid = array.length / 2 - 1;
 
-        // BUG — both threads get the same indices!
         SortingThread st0 = new SortingThread(array, 0, mid);
         SortingThread st1 = new SortingThread(array, mid+1, array.length - 1);
 
-        //start time for multithread
-        long multiStart = System.currentTimeMillis();
-
         Thread thread0 = new Thread(st0);
         Thread thread1 = new Thread(st1);
+
+        int[] result = new int[array.length];
+        MergingThread mt = new MergingThread(array, result, mid);
+        Thread mergeThread = new Thread(mt);
+
+        //start time for multithread
+        long multiStart = System.currentTimeMillis();
 
         thread0.start();
         thread1.start();
@@ -30,9 +33,7 @@ public class Main {
             throw new RuntimeException("Sorting was interrupted", e);
         }
 
-        int[] result = new int[array.length];
-        MergingThread mt = new MergingThread(array, result, mid);
-        Thread mergeThread = new Thread(mt);
+
         mergeThread.start();
 
         try{
