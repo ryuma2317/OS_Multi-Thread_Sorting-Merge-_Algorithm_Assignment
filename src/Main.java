@@ -1,4 +1,23 @@
+/**
+ * Main.java
+ * <p>
+ * Driver class for the Multithreaded Sorting Application.
+ * Benchmarks both single-threaded and multithreaded Merge Sort
+ * across multiple input sizes and prints the execution times.
+ * </p>
+ *
+ * @author CHHIM Soksambath
+ * @version 1.0
+ */
 public class Main {
+
+    /**
+     * Entry point of the program.
+     * Runs a warmup, then benchmarks both sorting versions
+     * across all defined input sizes.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
 
         System.out.println("=== Sorting Benchmark ===\n");
@@ -10,32 +29,48 @@ public class Main {
         runMultiThreadedSort(warmup.clone(), warmup.length / 2 - 1);
         System.out.println("Done!\n");
 
-        // test these sizes
+        // test sizes
         int[] sizes = {10000, 100000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000, 200000000, 500000000};
 
         for (int size : sizes) {
+            try {
+                int[] data = generateArray(size);
+                int mid = size / 2 - 1;
 
-            int[] data = generateArray(size);
-            int mid = size / 2 - 1;
+                // time single threaded
+                long singleStart = System.currentTimeMillis();
+                runSingleThreadedSort(data.clone());
+                long singleTime = System.currentTimeMillis() - singleStart;
 
-            // time single threaded
-            long singleStart = System.currentTimeMillis();
-            runSingleThreadedSort(data.clone());
-            long singleTime = System.currentTimeMillis() - singleStart;
+                // time multithreaded
+                long multiStart = System.currentTimeMillis();
+                runMultiThreadedSort(data.clone(), mid);
+                long multiTime = System.currentTimeMillis() - multiStart;
 
-            // time multithreaded
-            long multiStart = System.currentTimeMillis();
-            runMultiThreadedSort(data.clone(), mid);
-            long multiTime = System.currentTimeMillis() - multiStart;
+                // print results
+                System.out.println("Size: " + size);
+                System.out.println("  Single : " + singleTime + " ms");
+                System.out.println("  Multi  : " + multiTime  + " ms");
+                System.out.println();
 
-            // print results
-            System.out.println("Size: " + size);
-            System.out.println("  Single : " + singleTime + " ms");
-            System.out.println("  Multi  : " + multiTime  + " ms");
-            System.out.println();
+            } catch (OutOfMemoryError e) {
+                System.out.println("Size: " + size);
+                System.out.println("  Stopped — out of memory!");
+                break;
+            }
         }
     }
 
+    /**
+     * Sorts the given array using three threads —
+     * two sorting threads and one merging thread.
+     * Uses Thread.join() to ensure correct ordering.
+     *
+     * @param array the array to sort (will not be modified)
+     * @param mid   the midpoint dividing left and right halves
+     * @return a new sorted array containing all elements
+     * @throws RuntimeException if any thread is interrupted
+     */
     static int[] runMultiThreadedSort(int[] array, int mid) {
         SortingThread st0 = new SortingThread(array, 0, mid);
         SortingThread st1 = new SortingThread(array, mid + 1, array.length - 1);
@@ -70,11 +105,25 @@ public class Main {
         return result;
     }
 
+    /**
+     * Sorts the given array using a single thread with Merge Sort.
+     *
+     * @param array the array to sort (modified in place)
+     * @return the sorted array
+     */
     static int[] runSingleThreadedSort(int[] array) {
         mergeSort(array, 0, array.length - 1);
         return array;
     }
 
+    /**
+     * Recursively sorts the array segment [lo, hi] using Merge Sort.
+     * Time complexity: O(n log n) in all cases.
+     *
+     * @param arr the array to sort
+     * @param lo  left boundary (inclusive)
+     * @param hi  right boundary (inclusive)
+     */
     static void mergeSort(int[] arr, int lo, int hi) {
         if (lo >= hi) return;
 
@@ -85,6 +134,14 @@ public class Main {
         merge(arr, lo, mid, hi);
     }
 
+    /**
+     * Merges two sorted halves of the array: [lo, mid] and [mid+1, hi].
+     *
+     * @param arr the array containing both sorted halves
+     * @param lo  start of the left half
+     * @param mid end of the left half
+     * @param hi  end of the right half
+     */
     static void merge(int[] arr, int lo, int mid, int hi) {
         int leftSize  = mid - lo + 1;
         int rightSize = hi - mid;
@@ -116,6 +173,13 @@ public class Main {
         while (j < rightSize) { arr[k] = right[j]; j++; k++; }
     }
 
+    /**
+     * Generates an array of random integers using a fixed seed
+     * so results are reproducible across runs.
+     *
+     * @param size number of elements to generate
+     * @return array of random integers in range [0, 10000000)
+     */
     static int[] generateArray(int size) {
         int[] array = new int[size];
         java.util.Random random = new java.util.Random(42);
@@ -125,6 +189,11 @@ public class Main {
         return array;
     }
 
+    /**
+     * Prints all elements of the array in a readable format.
+     *
+     * @param arr the array to print
+     */
     static void printArray(int[] arr) {
         System.out.print("[");
         for (int i = 0; i < arr.length; i++) {
